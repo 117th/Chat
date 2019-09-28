@@ -2,13 +2,14 @@ package client.impl;
 
 import client.vo.Message;
 import client.constant.Colors;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
+import server.ServerRunner;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 @Component
 public class Client extends Thread{
@@ -22,6 +23,8 @@ public class Client extends Thread{
     private BufferedWriter out;
 
     private String host = "localhost";
+
+    private ApplicationContext context = new AnnotationConfigApplicationContext("client", "server");
 
     public Client() {
     }
@@ -85,10 +88,9 @@ public class Client extends Thread{
                     Message message = new Message(in.readLine());
 
                     if(message.getUsername().equals("SERVER_SHUTDOWN")){
-                        System.out.println("Got server shutdown message. Server gonna start on this machine");
-                        String[] hist = message.getBody().split(";");
-
-                        for(String histm : hist) System.out.println(histm);
+                        handleServerStartRequest(message);
+                    } else if (message.getUsername().equals("SERVER_TRANSFER")) {
+                        handleServerAddressChange(message);
                     } else {
                         System.out.println(getColorForUser(message.getUsername()) + message.toString() + Colors.ANSI_RESET);
                     }
@@ -97,6 +99,22 @@ public class Client extends Thread{
                 }
             }
         }
+    }
+
+    private void handleServerStartRequest(Message transferMessage){
+
+        System.out.println("Got server shutdown message. Server gonna start on this machine");
+
+        ServerRunner serverRunner = context.getParent().getBean(ServerRunner.class);
+
+        serverRunner.transferHistory(transferMessage.getBody());
+        serverRunner.start();
+
+    }
+
+    public void handleServerAddressChange(Message newAddressMessage) throws IOException{
+        host = newAddressMessage.getBody();
+        configure();
     }
 
     private class MessageWriter extends Thread {

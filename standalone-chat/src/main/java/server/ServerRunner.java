@@ -4,9 +4,11 @@ import server.listener.Listener;
 import client.vo.Message;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -41,8 +43,28 @@ public class ServerRunner extends Thread{
             collection.append(message.toString());
         }
 
+        System.out.println("History message created. Sending request to start new broker");
+
         Message closeMessage = new Message("SERVER_SHUTDOWN", collection.toString());
 
         listeners.getLast().send(closeMessage.toString());
+
+        String newAddress = listeners.getLast().getIp();
+
+        closeMessage = new Message("SERVER_TRANSFER", newAddress);
+
+        System.out.println("Gonna start server at " + newAddress);
+
+        listeners.getLast().send(closeMessage.toString());
+
+        try {
+            Thread.sleep(10 * 1000);
+        } catch (InterruptedException e) {}
+    }
+
+    public void transferHistory(String historyCollection){
+        List<String> historyAsStrigs = Arrays.asList(historyCollection.split(";"));
+
+        for(String messageString : historyAsStrigs) history.add(new Message(messageString));
     }
 }

@@ -66,4 +66,8 @@ public class Listener extends Thread{
             System.out.println("Fail send");
         }
     }
+
+    public String getIp(){
+        return socket.getInetAddress().getHostAddress();
+    }
 }
