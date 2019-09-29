@@ -24,6 +24,9 @@ public class ServerRunner extends Thread{
     @Override
     public void run() {
         ServerSocket serverSocket;
+
+        System.out.println("Started broker");
+
         try{
 
         serverSocket = new ServerSocket(PORT);
