@@ -116,8 +116,13 @@ public class Client extends Thread{
 
     public void handleServerAddressChange(Message newAddressMessage) throws IOException{
         System.out.println("Moving to new broker: " + newAddressMessage.getBody());
-        host = newAddressMessage.getBody();
-        configure();
+        try {
+            host = newAddressMessage.getBody();
+            configure();
+        } catch (Exception e){
+            System.out.println("Failed to move to new broker. Current address " + socket.getInetAddress().toString());
+            e.printStackTrace();
+        }
         System.out.println("Moved to new broker: " + socket.getInetAddress().toString());
     }
 
