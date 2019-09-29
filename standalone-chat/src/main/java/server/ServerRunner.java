@@ -1,5 +1,7 @@
 package server;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import server.listener.Listener;
 import client.vo.Message;
 import org.springframework.stereotype.Component;
@@ -64,6 +66,8 @@ public class ServerRunner extends Thread{
 
     public void transferHistory(String historyCollection){
         List<String> historyAsStrigs = Arrays.asList(historyCollection.split(";"));
+
+        System.out.println("Transfering history, " + historyAsStrigs.size() + " messages");
 
         for(String messageString : historyAsStrigs) history.add(new Message(messageString));
     }

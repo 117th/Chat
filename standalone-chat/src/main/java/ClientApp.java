@@ -17,7 +17,7 @@ public class ClientApp {
     public static ServerRunner serverRunner;
 
     public static void main(String[] args){
-        ApplicationContext context = new AnnotationConfigApplicationContext("client");
+        ApplicationContext context = new AnnotationConfigApplicationContext("client", "server");
 
         Scanner in = new Scanner(System.in);
 

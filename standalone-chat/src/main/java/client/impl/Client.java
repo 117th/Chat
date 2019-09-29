@@ -2,6 +2,7 @@ package client.impl;
 
 import client.vo.Message;
 import client.constant.Colors;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;
@@ -24,7 +25,8 @@ public class Client extends Thread{
 
     private String host = "localhost";
 
-    private ApplicationContext context = new AnnotationConfigApplicationContext("client", "server");
+    @Autowired
+    private ApplicationContext context;
 
     public Client() {
     }
@@ -105,7 +107,7 @@ public class Client extends Thread{
 
         System.out.println("Got server shutdown message. Server gonna start on this machine");
 
-        ServerRunner serverRunner = context.getParent().getBean(ServerRunner.class);
+        ServerRunner serverRunner = context.getBean(ServerRunner.class);
 
         serverRunner.transferHistory(transferMessage.getBody());
         serverRunner.start();
@@ -125,6 +127,7 @@ public class Client extends Thread{
             while (true) {
                 try {
                     Message message = new Message(username, reader.nextLine());
+                    if(message.getBody().equals("STOP_SERVER")) System.exit(0);
                     out.write(message.toString() + "\n");
                     out.flush();
                 } catch (IOException e) {
