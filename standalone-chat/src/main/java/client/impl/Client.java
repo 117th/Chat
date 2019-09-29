@@ -115,8 +115,10 @@ public class Client extends Thread{
     }
 
     public void handleServerAddressChange(Message newAddressMessage) throws IOException{
+        System.out.println("Moving to new broker: " + newAddressMessage.getBody());
         host = newAddressMessage.getBody();
         configure();
+        System.out.println("Moved to new broker: " + socket.getInetAddress().toString());
     }
 
     private class MessageWriter extends Thread {

@@ -57,7 +57,9 @@ public class ServerRunner extends Thread{
 
         System.out.println("Gonna start server at " + newAddress);
 
-        listeners.getLast().send(closeMessage.toString());
+        for(Listener listener : listeners){
+            listener.send(closeMessage.toString());
+        }
 
         try {
             Thread.sleep(10 * 1000);
