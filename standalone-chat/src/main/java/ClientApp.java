@@ -16,7 +16,8 @@ public class ClientApp {
 
     public static ServerRunner serverRunner;
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws IOException{
+        //TODO: clean this mess up
         ApplicationContext context = new AnnotationConfigApplicationContext("client", "server");
 
         Scanner in = new Scanner(System.in);
@@ -34,7 +35,7 @@ public class ClientApp {
                 System.out.print("Host: ");
                 host = in.nextLine();
                 client.setHost(StringUtils.hasText(host) ? host : "localhost");
-                client.configure();
+                client.configureToNioMode();
                 break;
             } catch (IOException e) {
                 System.out.println("No such host. Enter valid host or create local server");
@@ -45,6 +46,8 @@ public class ClientApp {
                 }
             }
         }
+
+        client.configureToNioMode();
 
         client.start();
 

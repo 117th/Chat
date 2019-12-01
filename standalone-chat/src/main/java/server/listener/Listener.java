@@ -2,6 +2,7 @@ package server.listener;
 
 import client.constant.Colors;
 import client.vo.Message;
+import com.google.gson.Gson;
 import server.ServerRunner;
 
 import java.io.*;
@@ -16,6 +17,8 @@ public class Listener extends Thread{
 
     private String username;
 
+    private Gson gson = new Gson();
+
     public Listener(Socket socket) throws IOException {
         this.socket = socket;
 
@@ -28,39 +31,32 @@ public class Listener extends Thread{
     public void run(){
 
         for(Message message : ServerRunner.history){
-            this.send(message.toString());
+            this.send(message.toGsonString());
         }
-
-        Message message;
 
         while (true) {
 
             try {
 
-                message = new Message(in.readLine());
+                String inline = in.readLine();
 
-                if(username == null && message.getUsername().equals("HOST")) username = message.getBody().split(" ")[0];
+                Message message = gson.fromJson(inline, Message.class);
 
                 ServerRunner.history.add(message);
 
                 for(Listener listener : ServerRunner.listeners){
-                    if(!listener.equals(this)) listener.send(message.toString());
+                    if(!listener.equals(this)) listener.send(message.toGsonString());
                 }
+
             } catch (Exception e) {
                 System.out.println("Listener failed. Looks like one of the clients is closed");
-                for(Listener listener : ServerRunner.listeners){
-                    message = new Message("HOST",username + " has left group");
-                    if(!listener.equals(this)) listener.send(message.toString());
-                }
-                ServerRunner.listeners.remove(this);
-                this.stop();
             }
         }
     }
 
     public void send(String msg){
         try{
-            out.write(msg + "\n");
+            out.write(msg);
             out.flush();
         } catch (IOException e) {
             System.out.println("Fail send");

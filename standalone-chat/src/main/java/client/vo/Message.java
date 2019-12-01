@@ -1,46 +1,73 @@
 package client.vo;
 
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
+
+import java.io.StringReader;
 import java.sql.Timestamp;
 import java.util.Date;
 
 public class Message {
 
+    private boolean isTechnical;
+    private boolean isSendFromHost;
     private String username;
     private Timestamp date;
     private String body;
 
-    public Message(String user, String body){
-        username = user;
-        this.body = body;
+    public Message(){
         date = new Timestamp(new Date().getTime());
     }
 
-    public Message(String msg){
+    public Message(String username, String body){
+        this.username = username;
+        this.body = body;
+        date = new Timestamp(new Date().getTime());
+        isTechnical = false;
+    }
 
-        String[] parse = msg.split(" ");
+    public static Message enteredUserMessage(String username){
+        Message message = new Message();
 
-        username = parse[2].replaceAll("\\[", "").replace("]", "").replace(":","");
-        date = Timestamp.valueOf(parse[0] + " " + parse[1]);
-        body = "";
+        message.isTechnical = false;
+        message.isSendFromHost = true;
+        message.username = "HOST";
+        message.body = username + " has entered the group";
 
-        for(int i = 3; i < parse.length; i++) body += parse[i] + " ";
+        return message;
     }
 
     public String getUsername() {
         return username;
     }
 
-    public Timestamp getDate() {
-        return date;
+    public boolean isTechnical() {
+        return isTechnical;
     }
 
-    public String getBody() {
-        return body;
+    public boolean isSendFromHost() {
+        return isSendFromHost;
     }
 
-    public String toString(){
+    public String toGsonString(){
+        Gson gson = new Gson();
+
+        return gson.toJson(this) + "\n";
+    }
+
+    public static Message fromJson(String json){
+        Gson gson = new Gson();
+
+        JsonReader malformedReader = new JsonReader(new StringReader(json));
+        malformedReader.setLenient(true);
+
+        return gson.fromJson(malformedReader, Message.class);
+    }
+
+    @Override
+    public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
 
-        return stringBuilder.append(date).append(" ").append("[").append(username).append("]").append(": ").append(body).toString();
+        return stringBuilder.append("[").append(date).append("] ").append(username).append(": ").append(body).toString();
     }
 }
