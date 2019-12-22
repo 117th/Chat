@@ -1,5 +1,6 @@
 package client.impl;
 
+import client.UI.ClientUI;
 import client.vo.Message;
 import client.constant.Colors;
 import com.google.gson.Gson;
@@ -31,6 +32,8 @@ public class Client extends Thread{
 
     private String host = "localhost";
 
+    public ClientUI ui;
+
     public Client() {
     }
 
@@ -58,10 +61,12 @@ public class Client extends Thread{
         this.host = host;
     }
 
+
     @Override
     public void run(){
         MessageReader messageReader = new MessageReader();
         MessageWriter messageWriter = new MessageWriter();
+        ui = new ClientUI("Client", username);
 
         sendHello();
 
@@ -103,7 +108,11 @@ public class Client extends Thread{
                     if(socketChannel.read(inBuffer) > 0){
                         Message message = Message.fromJson(new String(inBuffer.array()));
 
-                        if(!message.isTechnical()) System.out.println(getColorForMessage(message) + message.toString() + Colors.ANSI_RESET);
+//                        if(!message.isTechnical()) System.out.println(getColorForMessage(message) + message.toString() + Colors.ANSI_RESET);
+                        if(!message.isTechnical()){
+                            System.out.println("in MessageReader, sending message to ui");
+                            ui.writeMessage(message);
+                        }
                     }
 
                 } catch (IOException e) {
@@ -121,11 +130,15 @@ public class Client extends Thread{
             while (true) {
                 try {
 
-                    Message message = new Message(username, reader.nextLine());
+//                    Message message = new Message(username, reader.nextLine());
+                    if(!ui.getLastMessage().equals("")) {
+                        Message message = new Message(username, ui.getLastMessage());
+                        outBuffer = ByteBuffer.wrap(message.toGsonString().getBytes());
+                        System.out.println("in MessageWriter, extracting message from ui");
 
-                    outBuffer = ByteBuffer.wrap(message.toGsonString().getBytes());
-                    while (outBuffer.hasRemaining()){
-                        socketChannel.write(outBuffer);
+                        while (outBuffer.hasRemaining()) {
+                            socketChannel.write(outBuffer);
+                        }
                     }
 
                 } catch (IOException e) {
@@ -135,5 +148,4 @@ public class Client extends Thread{
             }
         }
     }
-
 }

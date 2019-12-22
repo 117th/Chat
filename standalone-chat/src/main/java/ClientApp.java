@@ -24,6 +24,7 @@ public class ClientApp {
 
         Client client = context.getBean(Client.class);
 
+
         NetworkScanner.printPossibleServers();
 
         System.out.print("Your username: ");
